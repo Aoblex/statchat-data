@@ -47,6 +47,9 @@ def main(prompt_topic, data_file_name, max_splits, start_split):
     logging.info(f"Generating questions and answers for splits {start_split} to {start_split+max_splits}...")
 
     for i, split in enumerate(splits[start_split-1:start_split-1+max_splits], start_split):
+
+        logging.info(f"Current processing: {i + 1}/{max_splits}")
+
         content = split.page_content
         answer_chain = answer_template.get_prompt_with_context(context=content) | qa_model.model | answer_template.output_parser
 
