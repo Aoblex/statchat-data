@@ -1,5 +1,3 @@
-#!/data/anaconda3/envs/llama_factory/bin/python
-
 import argparse
 import json
 import os
