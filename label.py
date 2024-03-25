@@ -1,9 +1,10 @@
-#!/data/anaconda3/envs/llama_factory/bin/python
 import argparse
 import json
 import os
 
 import bisect
+
+LABEL_LEVELS = ['0', '1', '2']
 
 def binary_search(lst, x):
     i = bisect.bisect_left(lst, x)
@@ -74,8 +75,8 @@ def main():
 
         while True:
 
-            label = input("Enter label (0 or 1), 'u' to undo last label, 'q' to quit: ")
-            if label in ['0', '1']:
+            label = input(f"Enter label {LABEL_LEVELS}, 'u' to undo last label, 'q' to quit: ")
+            if label in LABEL_LEVELS:
                 data[i]['label'] = int(label)
                 break
             elif label == 'u':
@@ -91,7 +92,7 @@ def main():
                     json.dump(data, f, indent=4, ensure_ascii=False)
                 return
             else:
-                print("Invalid input. Please enter 0, 1, u, or q.")
+                print(f"Invalid input. Please enter {LABEL_LEVELS}, u, or q.")
         i = i + 1
 
 if __name__ == "__main__":
