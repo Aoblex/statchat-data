@@ -58,3 +58,17 @@ lky|深度学习|label_tasks/label_lky.sh|
 ### 注意事项
 
 开始打标签之前，先使用 `git pull` 更新数据。每次标记完成后记得 `git add` 和 `git commit`，提交的注释最好用英文写。提交完成后记得 `git push`
+
+### 使用示例
+一定要切换到`statchat-data`所在目录
+```bash
+  [llama_factory] root@vgpu >> /data/wangchenrui/statchat-data 
+  Monday 25 March 12:56:24 [main]
+  $ ./label_tasks/label_wcr.sh 
+-------------------------------------------------------------
+问题：在这个年龄段的人群中，哪个年龄段的人数最多？
+
+回答：在这个年龄段的人群中，40岁至50岁的人数最多，为100人。
+
+Enter label ['0', '1', '2'], 'u' to undo last label, 'q' to quit:   
+```
