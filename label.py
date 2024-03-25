@@ -67,7 +67,14 @@ def main():
 
         show_qa(data[i])
 
-        print(f">>> Labeling progress: \033[32m{i}/{len(data)}\033[0m")
+        print(f">>> Labeling progress: \033[36m{i-1}/{len(data)}\033[0m")
+
+        zero_counts = len([item for item in data if item.get("label", None) == 0])
+        one_counts = len([item for item in data if item.get("label", None) == 1])
+        two_counts = len([item for item in data if item.get("label", None) == 2])
+
+        print(f">>> Labeling statistics: \033[31m0: {zero_counts}, \033[33m1: {one_counts}, \033[32m2: {two_counts}\033[0m")
+
         if data[i].get("label", None) is not None:
             print("Already labeled, skipping.")
             i = i + 1
