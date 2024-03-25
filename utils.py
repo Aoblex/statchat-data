@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -8,30 +9,29 @@ def save_json(file_path, py_obj):
         json.dump(py_obj, json_file, ensure_ascii=False, indent=4)
     logger.info(f"Response saved to {file_path}")
 
-# escape_dict = {
-#     "\\": "\\\\",
-#     "\t": "\\t",
-#     "\b": "\\b",
-#     "\n": "\\n",
-#     "\r": "\\r",
-#     "\f": "\\f",
-#     "\'": "\\'",
-#     "\"": "\\\"",
-#     "\0": "\\0",
-#     "\a": "\\a",
-#     "\v": "\\v",
-#     "\x07": "\\x07",  # ASCII 07
-#     "\x08": "\\x08",  # ASCII 08
-#     "\x09": "\\x09",  # ASCII 09
-#     "\x0a": "\\x0a",  # ASCII 10
-#     "\x0b": "\\x0b",  # ASCII 11
-#     "\x0c": "\\x0c",  # ASCII 12
-#     "\x0d": "\\x0d",  # ASCII 13
-#     "\x1a": "\\x1a",  # ASCII 26
-#     "\x1b": "\\x1b",  # ASCII 27
-# }
+escape_dict = {
+    "\t": "\\t",
+    "\r": "\\r",
+    "\x07": "\\a",  # ASCII 07
+    "\x08": "\\b",  # ASCII 08
+    "\x0b": "\\v",  # ASCII 11
+    "\x0c": "\\f",  # ASCII 12
+}
 
-# def unescape_string(s):
-#     for k, v in escape_dict.items():
-#         s = s.replace(v, k)
-#     return s
+def unescape_string(s: str):
+    for k, v in escape_dict.items():
+        s = s.replace(k, v)
+    return s
+
+def is_good_text(text):
+    if not text:
+        return False
+
+    bad_patterns_raw_text = [
+        r"[0-9]+\.[0-9]+",
+        r"(给定的)|(这个)",
+        r"/(https?:\/\/)?(([0-9a-z.]+\.[a-z]+)|(([0-9]{1,3}\.){3}[0-9]{1,3}))(:[0-9]+)?(\/[0-9a-z%/.\-_]*)?(\?[0-9a-z=&%_\-]*)?(\#[0-9a-z=&%_\-]*)?/ig",
+        r"\}\}\}\}\}"
+    ]
+    bad_patterns = [re.compile(pattern) for pattern in bad_patterns_raw_text]
+    return all(not pattern.search(text) for pattern in bad_patterns)
