@@ -67,6 +67,7 @@ def main():
 
         show_qa(data[i])
 
+        print(f">>> Labeling progress: \033[32m{i}/{len(data)}\033[0m")
         if data[i].get("label", None) is not None:
             print("Already labeled, skipping.")
             i = i + 1
@@ -75,7 +76,7 @@ def main():
 
         while True:
 
-            label = input(f"Enter label {LABEL_LEVELS}, 'u' to undo last label, 'q' to quit: ")
+            label = input(f">>> Enter label {LABEL_LEVELS}, 'u' to undo last label, 'q' to quit: ")
             if label in LABEL_LEVELS:
                 data[i]['label'] = int(label)
                 break
