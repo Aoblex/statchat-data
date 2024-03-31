@@ -6,10 +6,11 @@ def main(args):
         chunk_size=args.chunk_size,
         chunk_overlap=args.chunk_overlap,
     )
-    splitter.save_markdown_splits(
+    num_splits = splitter.save_markdown_splits(
         input_dir=args.input_dir,
         output_dir=args.output_dir,
     )
+    print(f"Saved {num_splits} splits to {args.output_dir}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
