@@ -20,6 +20,11 @@ def remove_links(text: str) -> str:
 def export_dataset(input_path: str, output_dir: str) -> None:
     file_name = os.path.basename(input_path)
     output_path = os.path.join(output_dir, file_name)
+
+    if not os.path.exists(input_path):
+        logger.error(f"File not found: {input_path}")
+        return
+
     with open(input_path, "r") as f:
         data = json.load(f)
     
