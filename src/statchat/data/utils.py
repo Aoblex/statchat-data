@@ -43,3 +43,5 @@ def export_dataset(input_path: str, output_dir: str) -> None:
     os.makedirs(output_dir, exist_ok=True)
     with open(output_path, "w") as f:
         json.dump(fine_tuning_data, f, indent=4, ensure_ascii=False)
+    
+    logger.info(f"Exported {len(fine_tuning_data)} QA pairs to {output_path}")
