@@ -16,11 +16,11 @@ class QAModel:
             temperature=temperature,
             base_url="https://api.132999.xyz/v1",
             model=model,
-            model_kwargs={
-                "response_format": {
-                    "type": "json_object",
-                },
-            }
+            # model_kwargs={
+            #     "response_format": {
+            #         "type": "json_object",
+            #     },
+            # }
         )
 
 
