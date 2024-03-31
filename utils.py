@@ -52,3 +52,6 @@ def is_good_text(text):
     ]
     bad_patterns = [re.compile(pattern) for pattern in bad_patterns_raw_text]
     return all(not pattern.search(text) for pattern in bad_patterns)
+
+def remove_markdown_url(text):
+    return re.sub(r"\[.*?\]\(.*?\)", "", text)
