@@ -27,7 +27,7 @@ def generate_question_and_answer(
     else:
         generated_qa_pairs = []
     generated_contexts_set = set([q["context"]["page_content"] for q in generated_qa_pairs])
-    logger.info(f"Generated questions loaded with length: {len(generated_qa_pairs)}")
+    logger.info(f"Generated question answer pairs loaded with length: {len(generated_qa_pairs)}")
 
     # Construct chain
     question_chain = question_prompt | qa_model | question_parser
@@ -45,8 +45,17 @@ def generate_question_and_answer(
         qa_info = {}
 
         # Generate question
-        qa_info["questions"] = question_chain.invoke({"context": page_content})["questions"]
-        qa_info["prompt"] = question_prompt.format(context=page_content)
+        while True:
+            try:
+                qa_info["questions"] = question_chain.invoke({"context": page_content})["questions"]
+                break
+            except Exception as e:
+                logger.error(f"Error: {e}")
+                logger.error(f"Retrying...")
+                continue
+
+        qa_info["question_prompt"] = question_prompt.template
+        qa_info["answer_prompt"] = answer_prompt.template
         qa_info["context"] = context
         logger.info(f"Generated question length: {len(qa_info['questions'])}")
 
@@ -54,7 +63,16 @@ def generate_question_and_answer(
         answers = []
         for question in qa_info["questions"]:
             logger.info(f"Generating answer for question: {question}")
-            answer = answer_chain.invoke({"context": page_content, "question": question})
+
+            while True:
+                try:
+                    answer = answer_chain.invoke({"context": page_content, "question": question})
+                    break
+                except Exception as e:
+                    logger.error(f"Error: {e}")
+                    logger.error(f"Retrying...")
+                    continue
+
             answers.append(answer)
             logger.info(f"Answer: {answer}")
         qa_info["answers"] = answers
@@ -62,9 +80,9 @@ def generate_question_and_answer(
 
         # Write to file
         generated_qa_pairs.append(qa_info)
-        if (len(qa_info) % write_frequency == 0) or (i == len(contexts) - 1):
+        if (len(generated_qa_pairs) % write_frequency == 0) or (i == len(contexts) - 1):
             with open(qa_path, "w") as file:
-                json.dump(qa_info, file, ensure_ascii=False, indent=4)
+                json.dump(generated_qa_pairs, file, ensure_ascii=False, indent=4)
             logger.info(f"Question and answers written to {qa_path}")
 
 def main(args):
@@ -96,7 +114,7 @@ def main(args):
         random.shuffle(contexts)
     if args.max_context:
         contexts = contexts[:args.max_context]
-    logger.info(f"Context loaded with length: {len(contexts)}")
+    logger.info(f"{len(contexts)} contexts will be used to generate questions and answers")
 
     generate_question_and_answer(
         contexts=contexts,
