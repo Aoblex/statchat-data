@@ -1,4 +1,6 @@
 test**
+new_test.json
+model_api_key.txt
 saves/
 # Byte-compiled / optimized / DLL files
 __pycache__/
