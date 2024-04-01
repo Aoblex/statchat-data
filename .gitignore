@@ -2,8 +2,6 @@ test**
 new_test.json
 model_api_key.txt
 saves/
-datasets/fine_tuning_data/
-datasets/question_answer/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
