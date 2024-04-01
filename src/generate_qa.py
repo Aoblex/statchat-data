@@ -6,6 +6,7 @@ from typing import List
 import argparse
 import json
 import os
+import time
 
 logger = get_logger(__name__)
 
@@ -50,10 +51,16 @@ def generate_question_and_answer(
                 qa_info["questions"] = question_chain.invoke({"context": page_content})["questions"]
                 break
             except Exception as e:
-                logger.error(f"Error: {e}")
+                error_string = str(e)
+                error_summary = error_string.split("-")[0].strip()
+                error_code = error_summary.split(":")[1].strip()
+                logger.error(f"Error Code: {error_code}")
+                if error_code == '429':
+                    logger.error(f"Rate limit exceeded. Waiting for 30 seconds...")
+                    time.sleep(30)
                 logger.error(f"Retrying...")
                 continue
-
+        
         qa_info["question_prompt"] = question_prompt.template
         qa_info["answer_prompt"] = answer_prompt.template
         qa_info["context"] = context
@@ -61,20 +68,27 @@ def generate_question_and_answer(
 
         # Generate answers
         answers = []
-        for question in qa_info["questions"]:
-            logger.info(f"Generating answer for question: {question}")
+        len_answers = len(qa_info["questions"])
+        for j, question in enumerate(qa_info["questions"], 1):
+            logger.info(f"[{j}/{len_answers}] Generating answer for question: {question}")
 
             while True:
                 try:
                     answer = answer_chain.invoke({"context": page_content, "question": question})
                     break
                 except Exception as e:
-                    logger.error(f"Error: {e}")
+                    error_string = str(e)
+                    error_summary = error_string.split("-")[0].strip()
+                    error_code = error_summary.split(":")[1].strip()
+                    logger.error(f"Error Code: {error_code}")
+                    if error_code == '429':
+                        logger.error(f"Rate limit exceeded. Waiting for 30 seconds...")
+                        time.sleep(30)
                     logger.error(f"Retrying...")
                     continue
 
             answers.append(answer)
-            logger.info(f"Answer: {answer}")
+            logger.info(f"[{j}/{len_answers}] Answer: {answer}")
         qa_info["answers"] = answers
         logger.info(f"Generated answer length: {len(qa_info['answers'])}")
 
