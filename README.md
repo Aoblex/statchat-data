@@ -37,6 +37,15 @@ python src/generate_qa.py --question_prompt_path datasets/prompts/statistics/que
                           --random
 ```
 
+### run.sh
+生成所有教材的问答。
+```bash
+./scripts/generate_statistics.sh
+./scripts/generate_mathematical_statistics.sh
+./scripts/generate_deeplearning.sh
+./scripts/generate_machine_learning.sh
+```
+
 ## 导出数据
 将数据集导出为适用于[LLaMA_Factory](https://github.com/hiyouga/LLaMA-Factory)训练的格式
 ```bash
