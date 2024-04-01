@@ -1,74 +1,44 @@
 # Statchat-data
 
-## 问答生成
+## 数据集说明
 
-选择`data`文件夹中的`markdown`格式文本以生成问答数据。
+所有的数据存放在`datasets`文件夹中。
 
-- prompt_topic: 任意字符串，用于替换提示词中的主题。
-- data_file_name: `data`文件夹中的文件名，无后缀名。
+- knowledge: 教科书的`md`文档。
+- context: 将教科书分块后生成的上下文片段。
+- prompts: 用于gpt问答生成的提示词。
 
+## 使用说明
+
+运行使用的脚本存放于`scripts`中
+
+### generate_context.sh
+将`input_dir`下的所有文档进行分块，输出到`output_dir`中，
+可以传入分块的参数。
 ```bash
-./main.py --prompt_topic 深度学习 \
-          --data_file_name deeplearning \
+python src/generate_context.py --input_dir datasets/knowledge \
+                               --output_dir datasets/context \
+                               --chunk_size 1000 \
+                               --chunk_overlap 500
 ```
 
-## 数据集合并
-
-运行 `generate_dataset.sh` 将生成的问答存储为训练的标准格式。
-
-### generate_dataset.sh
+### generate_statistics.sh
+利用gpt，使用写好的prompt生成问答，通过设置`random`参数随机取上下文，已经生成过的上下文会自动跳过。
 ```bash
-./export_to_dataset.py --data_file_name statistics
-./export_to_dataset.py --data_file_name mathematical_statistics
-./export_to_dataset.py --data_file_name deeplearning
-./export_to_dataset.py --data_file_name machine_learning 
+python src/generate_qa.py --question_prompt_path datasets/prompts/statistics/question.txt \
+                          --answer_prompt_path datasets/prompts/statistics/answer.txt \
+                          --context_path datasets/context/statistics.json \
+                          --qa_path datasets/question_answer/statistics.json \
+                          --openai_api_key_path model_api_key.txt \
+                          --temperature 0.0 \
+                          --model gpt-3.5-turbo-1106 \
+                          --max_context 3 \
+                          --write_frequency 1 \
+                          --random
 ```
 
-## 数据筛选
-
-运行 `label.sh` 给 `datasets` 文件夹中的数据打标签。
-
-### 运行说明
-首先读取`file_dir`中的数据用于打标签，然后读取`output_dir`中的对应文件更新已经记录过的标签。
-
-- file_dir: 待标签文件的目录
-- output_dir: 标签的输出目录
-- file_name: 待标签文件的文件名，无后缀名，默认为`json`文件。
-
-标记后的数据会存放在`output_dir`目录中，文件名为`file_name`。
-
-### 操作说明
-显示一组问答后有若干输入选项：
-- label: 输入`0,1,2`标记数据，数据质量依次递增，`0`表示数据质量差，`2`表示数据质量好。
-    - 对于一些含有 `根据例题/表格/公式1.1.1...`等的强烈依赖于上下文的数据可以归类为`0`
-    - 对于类似于`对于某电商6月份各天的销售额数据，如何计算销售额的偏度和峰度？`的不明确引用的数据；或者拿不定主意，不确定好坏的数据，可以归类为`1`
-    - 对于你认为质量相对较好的适用于训练的数据，可以归类为`2`
-- undo: 输入`u`撤回上一个标签。
-- quit: 输入`q`退出，将本次标记的标签写入文件。
-
-### 分工
-
-|姓名|科目|运行文件|
-|---|---|---|
-wcr|统计学|label_tasks/label_wcr.sh|
-ljw|数理统计|label_tasks/label_ljw.sh|
-zyc|机器学习|label_tasks/label_zyc.sh|
-lky|深度学习|label_tasks/label_lky.sh|
-
-### 注意事项
-
-开始打标签之前，先使用 `git pull` 更新数据。每次标记完成后记得 `git add` 和 `git commit`，提交的注释最好用英文写。提交完成后记得 `git push`
-
-### 使用示例
-一定要切换到`statchat-data`所在目录
+## 导出数据
+将数据集导出为适用于[LLaMA_Factory](https://github.com/hiyouga/LLaMA-Factory)训练的格式
 ```bash
-  [llama_factory] root@vgpu >> /data/wangchenrui/statchat-data 
-  Monday 25 March 12:56:24 [main]
-  $ ./label_tasks/label_wcr.sh 
--------------------------------------------------------------
-问题：在这个年龄段的人群中，哪个年龄段的人数最多？
-
-回答：在这个年龄段的人群中，40岁至50岁的人数最多，为100人。
-
-Enter label ['0', '1', '2'], 'u' to undo last label, 'q' to quit:   
+python src/export_dataset.py
 ```
