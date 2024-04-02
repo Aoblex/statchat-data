@@ -56,8 +56,13 @@ def generate_question_and_answer(
                 error_code = error_summary.split(":")[1].strip()
                 logger.error(f"Error Code: {error_code}")
                 if error_code == '429':
-                    logger.error(f"Rate limit exceeded. Waiting for 30 seconds...")
-                    time.sleep(30)
+                    rate_limit_wait = 30
+                    logger.error(f"Rate limit exceeded. Waiting for {rate_limit_wait} seconds...")
+                    time.sleep(rate_limit_wait)
+                elif error_code == '503':
+                    service_wait = 10
+                    logger.error(f"Service Unavailable. Waiting for {service_wait} seconds...")
+                    time.sleep(service_wait)
                 logger.error(f"Retrying...")
                 continue
         
