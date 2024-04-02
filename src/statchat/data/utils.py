@@ -17,28 +17,26 @@ def remove_links(text: str) -> str:
     text = re.sub(r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", "", text)
     return text
 
-def export_dataset(input_path: str, output_dir: str) -> None:
-    file_name = os.path.basename(input_path)
-    output_path = os.path.join(output_dir, f"{file_name.split('.')[0]}_dataset.json")
+def export_qa_datasets(input_dir: str, output_dir: str) -> None:
+    file_names = os.listdir(input_dir)
+    output_path = os.path.join(output_dir, "statchat_qa.json")
 
-    if not os.path.exists(input_path):
-        logger.error(f"File not found: {input_path}")
-        return
-
-    with open(input_path, "r") as f:
-        data = json.load(f)
-    
     fine_tuning_data = []
-    for item in data:
-        questions = item['questions']
-        answers = item['answers']
-        for question, answer in zip(questions, answers):
-            fine_tuning_data.append({
-                "prompt": question,
-                "query": "",
-                "response": answer,
-                "history": [],
-            })
+
+    for file_name in file_names:
+        with open(os.path.join(input_dir, file_name), "r") as f:
+            data = json.load(f)
+        
+        for item in data:
+            questions = item['questions']
+            answers = item['answers']
+            for question, answer in zip(questions, answers):
+                fine_tuning_data.append({
+                    "prompt": question,
+                    "query": "",
+                    "response": answer,
+                    "history": [],
+                })
 
     os.makedirs(output_dir, exist_ok=True)
     with open(output_path, "w") as f:
