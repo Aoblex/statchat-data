@@ -134,7 +134,10 @@ def negative_sampling(
             logger.info(f"Rewritten {i+1}th triplet")
         
         if all_triplet.get("rewritten_triplets_ic", None) is None:
-            incomplete_triplet = make_incomplete(all_triplet)
+            if all_triplet.get("triplets_ic", None) is None:
+                incomplete_triplet = make_incomplete(all_triplet)
+            else:
+                incomplete_triplet = all_triplet
             triplet_str = json.dumps({"triplets": incomplete_triplet["triplets_ic"]}, ensure_ascii=False, indent=4)
             all_triplets[i]["triplets_ic"] = incomplete_triplet["triplets_ic"]
             all_triplets[i]["rewritten_triplets_ic"] = rewrite_triplet(unstable_rewrite_chain, triplet_str)
@@ -143,7 +146,10 @@ def negative_sampling(
             logger.info(f"Rewritten {i+1}th incomplete triplet")
         
         if all_triplet.get("rewritten_triplets_nf", None) is None:
-            nonfactual_triplet = make_nonfactual(all_triplet, nonfactual_chain)
+            if all_triplet.get("triplets_nf", None) is None:
+                nonfactual_triplet = make_nonfactual(all_triplet, nonfactual_chain)
+            else:
+                nonfactual_triplet = all_triplet
             triplet_str = json.dumps({"triplets": nonfactual_triplet["triplets_nf"]}, ensure_ascii=False, indent=4)
             all_triplets[i]["triplets_nf"] = nonfactual_triplet["triplets_nf"]
             all_triplets[i]["rewritten_triplets_nf"] = rewrite_triplet(unstable_rewrite_chain, triplet_str)
@@ -152,7 +158,10 @@ def negative_sampling(
             logger.info(f"Rewritten {i+1}th non-factual triplet")
 
         if all_triplet.get("rewritten_triplets_il", None) is None:
-            illogical_triplet = make_illogical(all_triplet)
+            if all_triplet.get("triplets_il", None) is None:
+                illogical_triplet = make_illogical(all_triplet)
+            else:
+                illogical_triplet = all_triplet
             triplet_str = json.dumps({"triplets": illogical_triplet["triplets_il"]}, ensure_ascii=False, indent=4)
             all_triplets[i]["triplets_il"] = illogical_triplet["triplets_il"]
             all_triplets[i]["rewritten_triplets_il"] = rewrite_triplet(unstable_rewrite_chain, triplet_str)
