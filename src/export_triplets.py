@@ -17,13 +17,23 @@ class RewrittenTriplet(TypedDict):
     rewritten_triplets_nf: str
     rewritten_triplets_il: str
 
+def have_all_keys(triplet: RewrittenTriplet) -> bool:
+    keys = ["prompt", "response", "triplets", "triplets_ic", "triplets_nf", "triplets_il", "rewritten_triplets", "rewritten_triplets_ic", "rewritten_triplets_nf", "rewritten_triplets_il"]
+    for key in keys:
+        if key not in triplet:
+            return False
+    return True
+
 def export_triplets(input_path: str, output_dir: str) -> None:
     with open(input_path, "r") as f:
         rewritten_triplets: List[RewrittenTriplet] = json.load(f)
     KG_dataset_name = "statchat_KG.json"
     KC_dataset_name = "statchat_KC.json"
     KG_dataset, KC_dataset = [], []
-    for rewritten_triplet in rewritten_triplets[:50]:
+    for i, rewritten_triplet in enumerate(rewritten_triplets, 1):
+        if not have_all_keys(rewritten_triplet):
+            logger.info(f"{i}th triplet have not generated yet, quitting")
+            break
         KG_dataset.append({
             "prompt": rewritten_triplet["prompt"],
             "query": "",
@@ -66,11 +76,13 @@ def export_triplets(input_path: str, output_dir: str) -> None:
         json.dump(
             KG_dataset,
             f, ensure_ascii=False, indent=4)
+    logger.info(f"Exported {len(KG_dataset)} triplets to {KG_dataset_name}")
     
     with open(os.path.join(output_dir, KC_dataset_name), "w") as f:
         json.dump(
             KC_dataset,
             f, ensure_ascii=False, indent=4)
+    logger.info(f"Exported {len(KC_dataset)} triplets to {KC_dataset_name}")
 
 
 if __name__ == "__main__":
