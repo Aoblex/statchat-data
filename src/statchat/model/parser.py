@@ -7,7 +7,7 @@ from typing import List
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 class Question(BaseModel):
-    questions: str = Field(description="一个有关上下文的问题列表")
+    questions: List[str] = Field(description="一个有关上下文的问题列表")
 
 class Triplet(BaseModel):
     subject: str = Field(description="主语")
@@ -19,6 +19,6 @@ class Triplets(BaseModel):
 
 class CustomParser:
 
-    question_parser = JsonOutputParser(pydantic_object=Question)
+    question_parser = StrOutputParser()
     answer_parser = StrOutputParser()
     triplets_parser = PydanticOutputParser(pydantic_object=Triplets)
