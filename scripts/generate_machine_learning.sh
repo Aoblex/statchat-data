@@ -6,6 +6,5 @@ python src/generate_qa.py --question_prompt_path datasets/prompts/machine_learni
                           --openai_api_key_path model_api_key.txt \
                           --temperature 0.0 \
                           --model gpt-3.5-turbo-1106 \
-                          --max_context 50 \
+                          --max_context 300 \
                           --write_frequency 1 \
-                          --random
