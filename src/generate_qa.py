@@ -45,7 +45,7 @@ def generate_question_and_answer(
             logger.info(f"Skipping generated context:\n{page_content}\n")
             continue
 
-        logger.info(f"[{i+1}/{len(contexts)}] Generating question and answer for context:\n{page_content}\n")
+        logger.info(f"[{i+1}/{len(contexts)}] {page_content}\n")
 
         # Generate question
         while True:
@@ -89,7 +89,7 @@ def generate_question_and_answer(
         answers = []
         len_answers = len(qa_info["questions"])
         for j, question in enumerate(qa_info["questions"], 1):
-            logger.info(f"[{j}/{len_answers}] Generating answer for question: {question}")
+            logger.info(f"[{j}/{len_answers}] {question}")
 
             while True:
                 try:
