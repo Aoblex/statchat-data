@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import time
+import re
 
 logger = get_logger(__name__)
 
@@ -43,13 +44,26 @@ def generate_question_and_answer(
         if page_content in generated_contexts_set:
             logger.info(f"Skipping generated context:\n{page_content}\n")
             continue
-        qa_info = {}
+
+        logger.info(f"[{i+1}/{len(contexts)}] Generating question and answer for context:\n{page_content}\n")
 
         # Generate question
         while True:
             try:
-                qa_info["questions"] = question_chain.invoke({"context": page_content})["questions"]
+                qa_info = question_chain.invoke({"context": page_content})
+                illegal_escapes_pattern = re.compile(r'(?<!\\)(\\[^"\\\/bfnrtu])')
+                qa_info = illegal_escapes_pattern.sub(
+                    lambda match: '\\' + match.group(1), qa_info 
+                )
+                qa_info = re.sub(r'^```json\s*|\s*```$', '', qa_info, flags=re.DOTALL).strip()
+                qa_info = json.loads(qa_info)
+                assert "questions" in qa_info.keys(), "Questions not in generated qa_info"
                 break
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON Decode Error: {e}")
+                with open("json_qa_error.txt", "w") as file:
+                    file.write(qa_info)
+                exit(0) 
             except Exception as e:
                 error_string = str(e)
                 error_summary = error_string.split("-")[0].strip()
