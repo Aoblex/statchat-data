@@ -5,6 +5,21 @@ import re
 
 logger = get_logger(__name__)
 
+def keep_split(split: dict) -> bool:
+    return True
+
+    if re.search(r"[0-9] *- *[0-9]", split["page_content"]) is not None:
+        return False
+    
+    metadata = split.get("metadata", {})
+    for value in metadata.values():
+        if "练习题" in value:
+            return False
+        if re.search(r"((例题?)|(表格?)) *[0-9]+([\.-][0-9]+){1,}", value) is not None:
+            return False
+
+    return True
+
 def get_text_file(file_path: str) -> str:
     logger.info(f"Reading text from {file_path}")
     with open(file_path, "r") as f:

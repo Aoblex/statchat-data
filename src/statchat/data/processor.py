@@ -3,9 +3,11 @@ from typing import List
 from .utils import (
     get_text_file,
     remove_links,
+    keep_split,
 ) 
 import json
 import os
+import re
 
 logger = get_logger(__name__)
 
@@ -52,7 +54,11 @@ class Splitter:
                 splits = [{"page_content": split}
                           for split in self.text_splitter.split_text(text)]
 
+            # Filter useless splits
+            splits = [split for split in splits if keep_split(split) is True]
+
             total_splits += len(splits)
+
             # Save these splits into one json file
             os.makedirs(output_dir, exist_ok=True)
             output_path = os.path.join(output_dir, name + ".json")
