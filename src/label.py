@@ -1,9 +1,9 @@
-#!/data/anaconda3/envs/llama_factory/bin/python
 import argparse
 import json
 import os
-
 import bisect
+
+LABEL_LEVELS = ['0', '1']
 
 def binary_search(lst, x):
     i = bisect.bisect_left(lst, x)
@@ -14,24 +14,21 @@ def binary_search(lst, x):
 
 def show_qa(data_item):
     print("-" * 80, '\n')
-    print(f"问题：{data_item['prompt']}\n")
+    print(f"问题：\033[33m{data_item['prompt']}\033[0m\n")
     print(f"回答：{data_item['response']}\n")
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--file_name", help="The JSON file to label",
-                        choices=["deeplearning", "machine_learning", "mathematical_statistics", "statistics"],)
-    parser.add_argument("--file_dir", help="The directory of the JSON file to label",
-                        choices=["datasets"])
-    parser.add_argument("--output_dir", help="The directory to save the labeled JSON file",
-                        choices=["labeled_datasets"])
+    parser.add_argument("--file_name", help="The JSON file to label")
+    parser.add_argument("--input_dir", help="The directory of the JSON file to label")
+    parser.add_argument("--output_dir", help="The directory to save the labeled JSON file")
     args = parser.parse_args()
 
-    file_name = f"{args.file_name}_dataset.json"
-    file_dir = args.file_dir
+    file_name = args.file_name
+    input_dir = args.input_dir
     output_dir = args.output_dir
-    file_path = os.path.join(file_dir, file_name)
+    file_path = os.path.join(input_dir, file_name)
     output_path = os.path.join(output_dir, file_name)
     os.makedirs(output_dir, exist_ok=True)
 
@@ -40,7 +37,8 @@ def main():
         with open(file_path, 'r') as f:
             data = json.load(f)
     else:
-        data = []   
+        print(f"File {file_path} does not exist.")
+        exit(0)
 
     # Labeled data
     if os.path.exists(output_path):
@@ -66,6 +64,13 @@ def main():
 
         show_qa(data[i])
 
+        print(f">>> Labeling progress: \033[36m{i + 1}/{len(data)}\033[0m")
+
+        zero_counts = len([item for item in data if item.get("label", None) == 0])
+        one_counts = len([item for item in data if item.get("label", None) == 1])
+
+        print(f">>> Labeling statistics: \033[31m0: {zero_counts}, \033[32m1: {one_counts}\033[0m")
+
         if data[i].get("label", None) is not None:
             print("Already labeled, skipping.")
             i = i + 1
@@ -74,8 +79,9 @@ def main():
 
         while True:
 
-            label = input("Enter label (0 or 1), 'u' to undo last label, 'q' to quit: ")
-            if label in ['0', '1']:
+            label = input(f">>> Enter label {LABEL_LEVELS}(default 1), 'u' to undo last label, 'q' to quit: ")
+            if label == '': label = '1'
+            if label in LABEL_LEVELS:
                 data[i]['label'] = int(label)
                 break
             elif label == 'u':
@@ -91,7 +97,9 @@ def main():
                     json.dump(data, f, indent=4, ensure_ascii=False)
                 return
             else:
-                print("Invalid input. Please enter 0, 1, u, or q.")
+                print(f"Invalid input. Please enter {LABEL_LEVELS}, u, or q.")
+        print(f"Label \033[1;31m{data[i]['label']}\033[0m added to:\n\033[33m{data[i]['prompt']}\033[0m")
+
         i = i + 1
 
 if __name__ == "__main__":
