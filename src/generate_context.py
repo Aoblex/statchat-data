@@ -6,7 +6,7 @@ def main(args):
         chunk_size=args.chunk_size,
         chunk_overlap=args.chunk_overlap,
     )
-    num_splits = splitter.save_markdown_splits(
+    num_splits = splitter.save_splits(
         input_dir=args.input_dir,
         output_dir=args.output_dir,
     )

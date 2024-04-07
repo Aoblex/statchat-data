@@ -35,23 +35,29 @@ class Splitter:
             is_separator_regex = False,
         )
 
-    def save_markdown_splits(self, input_dir: str, output_dir: str) -> int:
+    def save_splits(self, input_dir: str, output_dir: str) -> int:
         filenames = os.listdir(input_dir)
         total_splits = 0
         for filename in filenames:
+            name, ext = os.path.splitext(filename)
             file_path = os.path.join(input_dir, filename)
-            markdown_text = get_text_file(file_path)
-            markdown_text = remove_links(markdown_text)
-            markdown_sections = self.markdown_splitter.split_text(markdown_text)
-            markdown_splits = [split.dict()
-                               for split in self.text_splitter.split_documents(markdown_sections)]
-            total_splits += len(markdown_splits)
+            text = get_text_file(file_path)
+
+            if ext == ".md":
+                text = remove_links(text)
+                sections = self.markdown_splitter.split_text(text)
+                splits = [split.dict()
+                          for split in self.text_splitter.split_documents(sections)]
+            else:
+                splits = [{"page_content": split}
+                          for split in self.text_splitter.split_text(text)]
+
+            total_splits += len(splits)
             # Save these splits into one json file
             os.makedirs(output_dir, exist_ok=True)
-            output_path = os.path.join(output_dir, filename.replace(".md", ".json"))
+            output_path = os.path.join(output_dir, name + ".json")
             with open(output_path, "w") as file:
-                json.dump(markdown_splits, file, indent=4, ensure_ascii=False)
+                json.dump(splits, file, indent=4, ensure_ascii=False)
             
-            logger.info(f"Saved {len(markdown_splits)} splits to {output_path}")
+            logger.info(f"Saved {len(splits)} splits to {output_path}")
         return total_splits
-
