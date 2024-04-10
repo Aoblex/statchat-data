@@ -50,7 +50,7 @@ def generate_question_and_answer(
         # Generate question
         while True:
             try:
-                qa_info = question_chain.invoke({"context": page_content})
+                qa_info = question_chain.invoke({"context": page_content.replace("\"", "“").replace("\"", "”")})
                 illegal_escapes_pattern = re.compile(r'(?<!\\)(\\[^"\\\/bfnrtu])')
                 qa_info = illegal_escapes_pattern.sub(
                     lambda match: '\\' + match.group(1), qa_info 
